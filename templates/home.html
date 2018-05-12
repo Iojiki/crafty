@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Material List</h1>
+
+
+
+{% for material in materials %}
+   
+    <ul>
+        <li>
+            {{material.name}} - {{material.description}} - <form action = '/update_value_minus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "-" /></form> {{material.total}}
+            <form action = '/update_value_plus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "+" /></form>  
+            <form action = '/delete' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "Delete" /></form>   
+            
+        </li>
+    </ul>
+
+{% endfor %}
+
+<h1>Create New Material</h1>
+<form action = '/addmaterial' method='POST'>
+    <label>
+        Material:
+        <input type="text" name='name' />
+    </label><br>
+    <label>
+        Description:
+        <input type="text" name='description' />
+    </label><br>
+    <label>
+        Total:
+        <input type="number" name='total' value = 0 />
+    </label><br>
+    <input type="submit" value='Add' />
+</form>
+
+
+{% endblock %}
