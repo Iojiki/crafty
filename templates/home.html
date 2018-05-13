@@ -19,6 +19,30 @@
 
 {% endfor %}
 
+<h1>Recipe List</h1>
+
+{% for recipe in recipes %}
+    {% set component_group = recipe.components %}
+    {% set final_group = component_group.split(";") %}
+
+    <ul>
+        <li>
+            {{recipe.name}} - {{recipe.description}} - {{recipe.components}}  
+        </li>
+        Components:
+        <ul>
+        {% for mat in final_group %}
+        <li>
+            {{mat}}
+        </li>
+        {% endfor %}
+        </ul>
+    </ul>
+
+{% endfor %}
+
+<!-- I need to compare the components in the recipe to the number of available materials-->
+
 <h1>Create New Material</h1>
 <form action = '/addmaterial' method='POST'>
     <label>
@@ -35,6 +59,43 @@
     </label><br>
     <input type="submit" value='Add' />
 </form>
+
+
+<h1>Create New Recipe</h1>
+<form action = '/addrecipe' method='POST'>
+    <label>
+        Name:
+        <input type="text" name='name' />
+    </label><br>
+    <label>
+        Description:
+        <input type="text" name='description' />
+    </label><br>
+    <label>
+        Components:
+        <select name = "material1">
+            {% for material in materials %}
+            <option value = "{{material.name}}">{{material.name}}</option>
+            {% endfor %}
+        </select>
+        <select name = "material2">
+            {% for material in materials %}
+            <option value = "{{material.name}}">{{material.name}}</option>
+            {% endfor %}
+        </select>
+        <select name = "material3">
+            {% for material in materials %}
+            <option value = "{{material.name}}">{{material.name}}</option>
+            {% endfor %}
+        </select>
+            
+    </label><br>
+    <input type="submit" value='Add' />
+</form>
+
+<!-- I need to create a quantity for the materials. I.e how much of an item are you requiring and store that number as a material_quantity value in the database-->
+<!-- Also need to find a way to allow users to select several components as part of a recipe / Partial done-->
+
 
 
 {% endblock %}

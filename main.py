@@ -30,6 +30,7 @@ class User(db.Model):
     username = db.Column(db.String(120))
     password = db.Column(db.String(120))
     materials = db.relationship('Materials', backref = 'owner')
+    recipes = db.relationship('Recipes', backref = 'owner')
 
     def __init__(self, username, password):
         self.username = username
@@ -49,6 +50,21 @@ class Materials(db.Model):
         self.total = total
         self.owner = owner
 
+#creating recipes database and linking back to user. components will be a string list for the time being
+class Recipes(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    description = db.Column(db.String(120))
+    components = db.Column(db.String(400))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __init__(self,name,description,components,owner):
+        self.name = name
+        self.description = description
+        self.components = components
+        self.owner = owner
+
 
 #MAIN PAGE/READ
 @app.route('/', methods = ['POST','GET'])
@@ -59,7 +75,8 @@ def index():
         user_name = User.query.filter_by(username = session['username']).first()
         user_id = user_name.id
         materials = Materials.query.filter_by(owner_id = user_id).all()
-        return render_template("home.html", title = "Main Page", materials = materials)
+        recipes = Recipes.query.filter_by(owner_id = user_id).all()
+        return render_template("home.html", title = "Main Page", materials = materials, recipes = recipes)
     
     
         
@@ -75,6 +92,22 @@ def add():
     db.session.commit()
 
     return redirect('/')
+
+@app.route('/addrecipe', methods = ['POST'])
+def add_recipe():
+    rec_name = request.form["name"]
+    rec_desc = request.form["description"]
+    rec_mat1 = request.form["material1"]
+    rec_mat2 = request.form["material2"]
+    rec_mat3 = request.form["material3"]
+    rec_mat = (rec_mat1 + ";" + rec_mat2 + ";" + rec_mat3)
+    owner = User.query.filter_by(username=session['username']).first()
+    new_recipe = Recipes(rec_name,rec_desc,rec_mat,owner)
+    db.session.add(new_recipe)
+    db.session.commit()
+
+    return redirect('/')
+
 
 #DELETE
 @app.route('/delete',methods = ['POST'])
