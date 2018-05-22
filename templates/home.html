@@ -25,15 +25,26 @@
     {% set component_group = recipe.components %}
     {% set final_group = component_group.split(";") %}
 
+    {% set component_total_group = recipe.component_totals %}
+    {% set final_total_group = component_total_group.split(";") %}
+
+   
+
     <ul>
         <li>
-            {{recipe.name}} - {{recipe.description}} - {{recipe.components}}  
+            {{recipe.name}} - {{recipe.description}} 
         </li>
         Components:
         <ul>
         {% for mat in final_group %}
         <li>
             {{mat}}
+        </li>
+        {% endfor %}
+
+        {% for num in final_total_group %}
+        <li>
+            {{num}}
         </li>
         {% endfor %}
         </ul>
@@ -73,21 +84,34 @@
     </label><br>
     <label>
         Components:
+        <br>
         <select name = "material1">
             {% for material in materials %}
             <option value = "{{material.name}}">{{material.name}}</option>
             {% endfor %}
         </select>
+        <label>
+            Total:
+            <input type="number" name='total1' value = 0 />
+        </label><br>
         <select name = "material2">
             {% for material in materials %}
             <option value = "{{material.name}}">{{material.name}}</option>
             {% endfor %}
         </select>
+        <label>
+            Total:
+            <input type="number" name='total2' value = 0 />
+        </label><br>
         <select name = "material3">
             {% for material in materials %}
             <option value = "{{material.name}}">{{material.name}}</option>
             {% endfor %}
         </select>
+        <label>
+            Total:
+            <input type="number" name='total3' value = 0 />
+        </label><br>
             
     </label><br>
     <input type="submit" value='Add' />

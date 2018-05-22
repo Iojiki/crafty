@@ -57,13 +57,16 @@ class Recipes(db.Model):
     name = db.Column(db.String(120))
     description = db.Column(db.String(120))
     components = db.Column(db.String(400))
+    component_totals = db.Column(db.String(400))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self,name,description,components,owner):
+    def __init__(self,name,description,components,component_totals,owner):
         self.name = name
         self.description = description
         self.components = components
+        self.component_totals = component_totals
         self.owner = owner
+#TODO: Make this work -- Add in component_totals to the database. Maybe drop all tables and re up tables? ---- THIS IS COMPLETE
 
 
 #MAIN PAGE/READ
@@ -100,9 +103,13 @@ def add_recipe():
     rec_mat1 = request.form["material1"]
     rec_mat2 = request.form["material2"]
     rec_mat3 = request.form["material3"]
+    rec_mat_val1 = request.form["total1"]
+    rec_mat_val2 = request.form["total2"]
+    rec_mat_val3 = request.form["total3"]
     rec_mat = (rec_mat1 + ";" + rec_mat2 + ";" + rec_mat3)
+    rec_mat_val = (rec_mat_val1 + ";" + rec_mat_val2 + ";" + rec_mat_val3)
     owner = User.query.filter_by(username=session['username']).first()
-    new_recipe = Recipes(rec_name,rec_desc,rec_mat,owner)
+    new_recipe = Recipes(rec_name,rec_desc,rec_mat, rec_mat_val, owner)
     db.session.add(new_recipe)
     db.session.commit()
 
