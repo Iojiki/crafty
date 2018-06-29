@@ -2,123 +2,30 @@
 
 {% block content %}
 
-<h1>Material List</h1>
+
+<div class="container mt">
+        <div class="row">
+            <div class="col">
+                <div class="mw-100 mh-100">
+                <form action = '/Pages/Inventory' method = 'GET'>
+                <button type="submit" class="btn btn-primary btn-lg mt-5" >Inventory</button>
+                </form>
+                </div>
+            </div>
+          <div class="col">
+            <div class="col">
+                <div class="mw-100 mh-100">
+                <form action = '/Pages/Craft' method = 'GET'>
+                <button type="submit" class="btn btn-primary btn-lg mt-5" >Craft</button>
+                </form>
+                </div>
+            </div>
+          </div>
+        </div>
 
 
 
-{% for material in materials %}
-   
-    <ul>
-        <li>
-            {{material.name}} - {{material.description}} - <form action = '/update_value_minus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "-" /></form> {{material.total}}
-            <form action = '/update_value_plus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "+" /></form>  
-            <form action = '/delete' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><input type= "submit" value= "Delete" /></form>   
-            
-        </li>
-    </ul>
-
-{% endfor %}
-
-<h1>Recipe List</h1>
-
-{% for recipe in recipes %}
-    {% set component_group = recipe.components %}
-    {% set final_group = component_group.split(";") %}
-
-    {% set component_total_group = recipe.component_totals %}
-    {% set final_total_group = component_total_group.split(";") %}
-
-   
-
-    <ul>
-        <li>
-            {{recipe.name}} - {{recipe.description}} 
-        </li>
-        Components:
-        <ul>
-        {% for mat in final_group %}
-        <li>
-            {{mat}}
-        </li>
-        {% endfor %}
-
-        {% for num in final_total_group %}
-        <li>
-            {{num}}
-        </li>
-        {% endfor %}
-        </ul>
-    </ul>
-
-{% endfor %}
-
-<!-- I need to compare the components in the recipe to the number of available materials-->
-
-<h1>Create New Material</h1>
-<form action = '/addmaterial' method='POST'>
-    <label>
-        Material:
-        <input type="text" name='name' />
-    </label><br>
-    <label>
-        Description:
-        <input type="text" name='description' />
-    </label><br>
-    <label>
-        Total:
-        <input type="number" name='total' value = 0 />
-    </label><br>
-    <input type="submit" value='Add' />
-</form>
-
-
-<h1>Create New Recipe</h1>
-<form action = '/addrecipe' method='POST'>
-    <label>
-        Name:
-        <input type="text" name='name' />
-    </label><br>
-    <label>
-        Description:
-        <input type="text" name='description' />
-    </label><br>
-    <label>
-        Components:
-        <br>
-        <select name = "material1">
-            {% for material in materials %}
-            <option value = "{{material.name}}">{{material.name}}</option>
-            {% endfor %}
-        </select>
-        <label>
-            Total:
-            <input type="number" name='total1' value = 0 />
-        </label><br>
-        <select name = "material2">
-            {% for material in materials %}
-            <option value = "{{material.name}}">{{material.name}}</option>
-            {% endfor %}
-        </select>
-        <label>
-            Total:
-            <input type="number" name='total2' value = 0 />
-        </label><br>
-        <select name = "material3">
-            {% for material in materials %}
-            <option value = "{{material.name}}">{{material.name}}</option>
-            {% endfor %}
-        </select>
-        <label>
-            Total:
-            <input type="number" name='total3' value = 0 />
-        </label><br>
-            
-    </label><br>
-    <input type="submit" value='Add' />
-</form>
-
-<!-- I need to create a quantity for the materials. I.e how much of an item are you requiring and store that number as a material_quantity value in the database-->
-<!-- Also need to find a way to allow users to select several components as part of a recipe / Partial done-->
+    
 
 
 

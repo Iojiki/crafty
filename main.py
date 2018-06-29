@@ -12,18 +12,8 @@ db = SQLAlchemy(app)
 #secret key for databasing
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
-#TODO: Create, Read, Delete is working. Still need to Update Materials value, name, quantity. Maybe add in an edit button for the whole
-#thing / individual update for number of materials
-#create classes for storing data. We need Users/Materials/Schematics...maybe games too
 
-#TODO: Need to get username working in order to be able to test further integration. Materials relationship is set up, just need a page for username, sign in etc... -- This is done
-#TODO: Link Materials List to Username and display only materials for the user the is logged in -- DONE
-
-#TODO: Make a list of Schematics that materials can build in to
-
-#TODO: Database for Schematics, Games, Drop down list...
-
-
+ #Database
 class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -50,40 +40,89 @@ class Materials(db.Model):
         self.total = total
         self.owner = owner
 
-#creating recipes database and linking back to user. components will be a string list for the time being
+
 class Recipes(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     description = db.Column(db.String(120))
-    components = db.Column(db.String(400))
-    component_totals = db.Column(db.String(400))
+    craftable = db.Column(db.Boolean(True))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self,name,description,components,component_totals,owner):
+    def __init__(self,name,description,craftable,owner):
         self.name = name
         self.description = description
-        self.components = components
-        self.component_totals = component_totals
+        self.craftable = craftable
         self.owner = owner
-#TODO: Make this work -- Add in component_totals to the database. Maybe drop all tables and re up tables? ---- THIS IS COMPLETE
+
+class Ingredients(db.Model):
+
+    id = db.Column(db.Integer, primary_key = True)
+    mat_id = db.Column(db.Integer)
+    mat_name = db.Column(db.String(120))
+    rec_qty = db.Column(db.Integer)
+    rec_id = db.Column(db.Integer, db.ForeignKey('recipes.id'))
+    
+
+    def __init__(self,mat_id,mat_name,rec_qty,rec_id):
+        self.mat_id = mat_id
+        self.mat_name = mat_name
+        self.rec_qty = rec_qty
+        self.rec_id = rec_id
 
 
-#MAIN PAGE/READ
+#PAGES -----------------------------------------
 @app.route('/', methods = ['POST','GET'])
 def index():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
+        checkIfCraft()
         user_name = User.query.filter_by(username = session['username']).first()
         user_id = user_name.id
         materials = Materials.query.filter_by(owner_id = user_id).all()
         recipes = Recipes.query.filter_by(owner_id = user_id).all()
-        return render_template("home.html", title = "Main Page", materials = materials, recipes = recipes)
-    
-    
+        ingredients = Ingredients.query.all()         
+
+    return render_template("home.html", title = "Main Page", materials = materials, recipes = recipes, ingredients = ingredients)
+
+
+@app.route('/Pages/Recipe', methods = ['POST', 'GET'])
+def recipepage():
+    if request.method == 'POST':
+        total_mat_needed = request.form["total_mat_needed"]
+        user_name = User.query.filter_by(username = session['username']).first()
+        user_id = user_name.id
+        materials = Materials.query.filter_by(owner_id = user_id).all()
+        recipes = Recipes.query.filter_by(owner_id = user_id).all()
+        return render_template("recipe.html", title = "Create Recipe", materials = materials, recipes = recipes, total_mat_needed = total_mat_needed)
+
+    else:
+        return render_template("recipe_value.html", title = "Select Number of Components")
         
-   #CREATE   things to do: make validation to ensure that a duplicate entry does not exist 
+@app.route('/Pages/Inventory', methods = ['POST', 'GET'])
+def inventorypage():
+    if not session.get('logged_in'):
+        return redirect('/')
+    else:
+        user_name = User.query.filter_by(username = session['username']).first()
+        user_id = user_name.id
+        materials = Materials.query.filter_by(owner_id = user_id).all()
+        return render_template("inventory.html", title = "User Inventory", materials = materials)
+
+@app.route('/Pages/Craft', methods = ['POST', 'GET'])
+def craftpage():
+    if not session.get('logged_in'):
+        return redirect('/')
+    else:
+        checkIfCraft()
+        user_name = User.query.filter_by(username = session['username']).first()
+        user_id = user_name.id
+        recipes = Recipes.query.filter_by(owner_id = user_id).all()
+        ingredients = Ingredients.query.all()   
+        return render_template("craft.html", title = "Craft", recipes = recipes, ingredients = ingredients)
+        
+   #CREATE  ----------------------
 @app.route('/addmaterial', methods = ['POST'])
 def add():
     mat_name = request.form["name"]
@@ -94,29 +133,43 @@ def add():
     db.session.add(new_material)
     db.session.commit()
 
-    return redirect('/')
+    return redirect('/Pages/Inventory')
 
 @app.route('/addrecipe', methods = ['POST'])
 def add_recipe():
     rec_name = request.form["name"]
     rec_desc = request.form["description"]
-    rec_mat1 = request.form["material1"]
-    rec_mat2 = request.form["material2"]
-    rec_mat3 = request.form["material3"]
-    rec_mat_val1 = request.form["total1"]
-    rec_mat_val2 = request.form["total2"]
-    rec_mat_val3 = request.form["total3"]
-    rec_mat = (rec_mat1 + ";" + rec_mat2 + ";" + rec_mat3)
-    rec_mat_val = (rec_mat_val1 + ";" + rec_mat_val2 + ";" + rec_mat_val3)
+    craftable = False
+
     owner = User.query.filter_by(username=session['username']).first()
-    new_recipe = Recipes(rec_name,rec_desc,rec_mat, rec_mat_val, owner)
+    new_recipe = Recipes(rec_name,rec_desc,craftable,owner)
     db.session.add(new_recipe)
     db.session.commit()
+    
 
-    return redirect('/')
+    recipe = Recipes.query.filter_by(name= rec_name).first()
+    recipe_id = recipe.id
+
+    iteration_Value = request.form["total_mat_needed"]
+    rec_mat_init = ''
+    rec_mat_val_init = ''
+    
+    for i in range(1, int(iteration_Value) + 1):
+
+        rec_mat_init = request.form["material" + str(i)]
+        rec_mat_val_init = request.form["total" + str(i)]
+  
+        rec_mat_name_q = Materials.query.filter_by(id = int(rec_mat_init)).first()
+        rec_mat_name = rec_mat_name_q.name
+
+        rec_mat = Ingredients(rec_mat_init,rec_mat_name,rec_mat_val_init,recipe_id)
+        db.session.add(rec_mat)
+        db.session.commit()
+            
+    return redirect('/Pages/Craft')
 
 
-#DELETE
+#DELETE --------------------------------
 @app.route('/delete',methods = ['POST'])
 def delete():
     id = request.form["columnid"]
@@ -126,7 +179,19 @@ def delete():
 
     return redirect('/')
 
-#UPDATE
+@app.route('/deleterecipe',methods = ['POST'])
+def deleterecipe():
+    id = request.form["columnid"]
+    delete_id = Recipes.query.filter_by(id = id).first()
+    deleteComponentId = Ingredients.query.filter_by(rec_id = id).all()
+    db.session.delete(delete_id)
+    for component in deleteComponentId:
+        db.session.delete(component)
+    db.session.commit()
+
+    return redirect('/Pages/Craft')
+
+#UPDATE ---------------------------
 @app.route('/update_value_minus',methods = ['POST'])
 def update_value_minus():
     id = request.form["columnid"]
@@ -135,7 +200,7 @@ def update_value_minus():
         modify_value.total = modify_value.total - 1
         db.session.commit()
 
-    return redirect('/')
+    return redirect('/Pages/Inventory')
 @app.route('/update_value_plus',methods = ['POST'])
 def update_value_plus():
     id = request.form["columnid"]
@@ -144,7 +209,22 @@ def update_value_plus():
         modify_value.total = modify_value.total + 1
         db.session.commit()
 
-    return redirect('/')
+    return redirect('/Pages/Inventory')
+
+@app.route('/craft',methods = ['POST'])
+def craft():
+    id = request.form["craft"]
+    ingredientsInRecipe = Ingredients.query.filter_by(rec_id = id).all()
+    for component in ingredientsInRecipe:
+        comp_id = component.mat_id
+        matAssoc = Materials.query.filter_by(id = comp_id).first()
+        matAssoc.total = matAssoc.total - component.rec_qty
+        db.session.commit()
+        
+    
+    return redirect('/Pages/Craft')
+
+#LOGIN --------------------
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -224,6 +304,29 @@ def signup():
         return redirect("/")
     else:
         return render_template('signup.html')
+
+#Non Route Functions -------------------------------
+
+def checkIfCraft():
+    user_name = User.query.filter_by(username = session['username']).first()
+    user_id = user_name.id
+    materials = Materials.query.filter_by(owner_id = user_id).all()
+    recipes = Recipes.query.filter_by(owner_id = user_id).all()
+    ingredients = Ingredients.query.all()
+        
+    #Checking if recipe is craftable
+    for recipe in recipes:
+        craftValue = True
+        for component in ingredients:
+            if component.rec_id == recipe.id:
+                filterValue = Materials.query.filter_by(id = component.mat_id).first()
+                if filterValue.total >= component.rec_qty and craftValue != False:
+                    craftValue = True 
+                    recipe.craftable = craftValue  
+                else:
+                    craftValue = False
+                    recipe.craftable = craftValue          
+    db.session.commit()  
 
 
 

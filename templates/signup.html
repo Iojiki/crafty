@@ -3,21 +3,31 @@
 {% block content %}
 
 <h1>Register</h1>
+<div class="container-fluid">
 <form action = '/signup' method='POST'>
-   <label>
-       Username
-       <input type="text" name='username' />
-   </label>{{error_username}}<br>
-   <label>
-       Password
-   <input type="password" name='password' />
-   </label>{{error_password}}<br>
-   <label>
-       Retype Password
-   <input type="password" name='verify_password' />
-   </label>{{error_verify_password}}<br>
+    <div class="form-group col-md-3">
+    <label for="Username">
+    Username
+    </label>
+    <input type="text" name='username' class="form-control" id="Username" placeholder="Username">
+   {{error_username}}</div><br>
+   <div class="form-group col-md-3">
+    <label for="Password">
+    Password
+    </label>
+    <input type="password" name='password' class="form-control" id="Password" placeholder="Password">
+   {{error_password}}</div><br>
+   <div class="form-group col-md-3">
+    <label for="RetypePassword">
+    Retype Password
+    </label>
+    <input type="password" name='verify_password' class="form-control" id="RetypePassword" placeholder="Retype Password">
+   {{error_verify_password}}</div><br>
 
-   <input type="submit" value='Register' />
+   <button type="submit" class="btn btn-primary btn-md mt-1">Register</button>
 </form>
+</div>
+
+
 
 {% endblock %}

@@ -1,0 +1,62 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<h1>Create New Recipe</h1>
+<div class="container-fluid">
+<form action = '/addrecipe' method='POST'>
+    <div class="form-group col-md-3">
+    <label for="RecipeName">
+    Name:
+    </label>
+    <input type="text" name='name' class="form-control" id="RecipeName" placeholder="Recipe Name">
+    </div><br>
+    <div class="form-group col-md-3">
+    <label for"RecipeDescription">
+    Description:
+    </label>
+    <input type="text" name='description' class="form-control" id="RecipeDescription" placeholder="Description">
+    </div><br>
+    <div class="form-row">
+        <div class="form-group col-md-3">
+        <label for="Component">
+        Component
+        </label>
+        </div>
+        <div class="form-group col-md-3">
+        <label for="TotalComponent">
+        Quantity
+        </label>
+        </div><br>
+    </div>
+
+    {% for i in range(1, (total_mat_needed|int + 1)) %}
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <select name = {{"material" ~ i}} class="form-control" id="Component">
+                    {% for material in materials %}
+                    <option value = "{{material.id}}">{{material.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <input type="number" name= {{"total" ~ i}} value = 0 class="form-control" id="TotalComponent">
+            </div>
+        </div>
+
+        
+    
+    {% endfor %}
+    
+    </div>
+    
+
+</div><br>
+<input type = "hidden" name = "total_mat_needed" value = {{total_mat_needed}} />
+<button type="submit" class="btn btn-primary btn-md mt-1">Create</button>
+</form>
+</div>
+
+    {% endblock %}

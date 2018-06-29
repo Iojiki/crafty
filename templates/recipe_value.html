@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<h1>How many Components?</h1>
+<div class="container-fluid">
+<form action = '/Pages/Recipe', method = 'POST'>
+    <div class="form-group col-md-3">
+    <label for= "ComponentQTY">Number of Components:</label>
+    <input type = "number" name = "total_mat_needed" value = 0 class="form-control" id="ComponentQTY">
+    </div>
+    
+    <button type="submit" class="btn btn-primary btn-md mt-1">Next</button>
+</form> 
+</div>
+
+
+
+    {% endblock %}

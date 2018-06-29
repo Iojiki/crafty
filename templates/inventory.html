@@ -1,0 +1,71 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Material List</h1>
+
+
+
+<div class="container-fluid">
+    <table class ="table">
+        <thead>
+            <tr>
+            <th scope="col">
+            Material Name:
+            </th>
+            <th scope="col">
+            Description of Material:
+            </th>
+            <th scope="col">
+            QTY:
+            </th>
+            
+        </thead>
+        <tbody>
+{% for material in materials %}
+            <tr>
+            <td>{{material.name}}</td><td>{{material.description}}</td>
+            <td>
+            <form action = '/update_value_minus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><button type="submit" class="btn btn-primary btn-sm mt-1">-</button></form>
+            </td>
+            <td>{{material.total}}</td>
+            <td>
+            <form action = '/update_value_plus' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><button type="submit" class="btn btn-primary btn-sm mt-1">+</button></form>
+            </td>
+            <td>
+            <form action = '/delete' method='POST'><input type = "hidden" name = "columnid" value = {{material.id}}><button type="submit" class="btn btn-primary btn-sm mt-1">Delete</button></form>
+            </td>
+            </tr>  
+{% endfor %}
+    </tbody>
+    </table>
+    
+</div>
+
+<h1>Create New Material</h1>
+<div class="container-fluid">
+<form action = '/addmaterial' method='POST'>
+    <div class="form-group col-md-3">
+    <label for="MaterialName">
+    Material
+    </label>
+    <input type="text" name='name' class="form-control" id="MaterialName" placeholder="Material Name">
+    </div><br>
+    <div class="form-group col-md-3">
+    <label for="MaterialDescription">
+    Description:
+    </label>
+    <input type="text" name='description' class="form-control" id="MaterialDescription" placeholder="Description">
+    </div><br>
+    <div class="form-group col-md-3">
+    <label for="MaterialQTY">
+    Quantity:
+    </label>
+    <input type="number" name='total' value = 0 class="form-control" id="MaterialQTY">
+    </div><br>
+    <button type="submit" class="btn btn-primary btn-md mt-1">Create</button>
+</form>
+</div>
+
+{% endblock %}

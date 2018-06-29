@@ -1,0 +1,66 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Recipe List</h1>
+
+<div class="container-fluid">
+    <table class ="table">
+        <thead>
+            <tr>
+            <th scope="col">
+            Recipe:
+            </th>
+            <th scope="col">
+            Description:
+            </th>
+            <th scope="col">
+            Components:
+            </th>
+            <th scope="col">
+            QTY:
+            </th>
+            
+        </thead>
+        <tbody>
+{% for recipe in recipes %}
+            <tr>
+            <td>{{recipe.name}}</td><td>{{recipe.description}}</td>  
+            <td>
+            <ul>
+    {% for component in ingredients %}
+        {% if component.rec_id == recipe.id %}
+            <li>
+            {{component.mat_name}}
+            </li>
+        {% endif %}
+    {% endfor %}
+            </ul>
+            </td>
+            <td>
+    {% for component in ingredients %}
+        {% if component.rec_id == recipe.id %}
+                            
+            {{component.rec_qty}} </br>
+                          
+        {% endif %}
+    {% endfor %}
+            </td>
+            <td>
+            {% if recipe.craftable == True %} <form action = '/craft' method='POST'><input type = "hidden" name = "craft" value = {{recipe.id}}><button type="submit" class="btn btn-sm btn-primary">Can Craft</button></form>
+            {% else %} <button type="submit" class="btn btn-secondary btn-sm" disabled>Cannot Craft</button>
+            {% endif %}
+            </td>
+            <td><form action = '/deleterecipe' method='POST'><input type = "hidden" name = "columnid" value = {{recipe.id}}><button type="submit" class="btn btn-sm btn-primary">Delete</button></form>
+            </tr>
+            
+    
+{% endfor %}
+
+</tbody>
+</table>
+<form action = '/Pages/Recipe' method='GET'><button type="submit" class="btn btn-sm btn-primary">Create New Recipe</button></form>
+</div>
+
+{% endblock %}
